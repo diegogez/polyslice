@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The sha256 below allows the inline import map. Re-run "node scripts/csp-hash.mjs" if you edit it. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-UIiVg22PC4ABTdJ22WSTrliOLGvfsog+qnGKL+MGxbk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'">
+  <title>PolySlice</title>
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <canvas id="fx"></canvas>
+  <div id="frost" class="overlay"></div>
+  <div id="frenzy-glow" class="overlay"></div>
+  <div id="flash" class="overlay"></div>
+  <div id="popups"></div>
+  <div id="banner" class="banner"></div>
+  <div id="drag-strip"></div>
+
+  <!-- In-game HUD -->
+  <header id="hud">
+    <div class="hud-left">
+      <div class="hud-label">SCORE</div>
+      <div id="hud-score" class="hud-score">0</div>
+      <div class="hud-best">BEST <span id="hud-best">0</span></div>
+    </div>
+    <div class="hud-center">
+      <div class="level-pill">
+        <span class="lv">LEVEL</span><span id="hud-level" class="lv-num">1</span><span id="hud-mult" class="mult">×1.00</span>
+      </div>
+      <div class="level-bar"><div id="hud-progress"></div></div>
+    </div>
+    <div class="hud-right">
+      <div id="hud-lives" class="lives"></div>
+      <div id="hud-timer" class="timer">
+        <svg viewBox="0 0 60 60"><circle class="track" cx="30" cy="30" r="26"/><circle id="hud-ring" class="ring" cx="30" cy="30" r="26"/></svg>
+        <span id="hud-time">1:00</span>
+      </div>
+      <button class="icon-btn" data-action="pause-btn" title="Pause (Esc)" aria-label="Pause"><i></i><i></i></button>
+    </div>
+  </header>
+  <div id="hud-combo" class="combo-meter"><span id="hud-combo-n">×2</span><small>COMBO</small></div>
+  <div id="hud-powerups"></div>
+  <div id="demo-banner"><span class="rec"></span>AI DEMO · the Java engine's AutoPilot is playing · click or press any key to exit</div>
+
+  <main id="screens">
+    <section id="screen-loading" class="screen">
+      <div class="loading">
+        <div class="spinner"><i></i><i></i><i></i></div>
+        <h1 class="logo small"><span class="logo-poly">POLY</span><span class="logo-slice">SLICE</span></h1>
+        <p>Starting the Java engine…</p>
+      </div>
+    </section>
+
+    <section id="screen-error" class="screen">
+      <div class="panel narrow">
+        <h2>Engine offline</h2>
+        <p id="error-message" class="error-text"></p>
+        <p class="muted">PolySlice runs its game logic in a Java process. Make sure a JDK 17+ is installed, or build the bundled runtime with <code>npm run build:jre</code>.</p>
+        <div class="buttons"><button class="btn primary" data-action="retry-engine">Retry</button><button class="btn ghost" data-action="quit">Quit</button></div>
+      </div>
+    </section>
+
+    <section id="screen-menu" class="screen">
+      <div class="menu-wrap">
+        <div class="hero">
+          <h1 class="logo"><span class="logo-poly">POLY</span><span class="logo-slice">SLICE</span></h1>
+          <p class="tagline">Slice the shapes. Dodge the bombs. Survive the speed.</p>
+        </div>
+        <div id="mode-cards" class="mode-cards"></div>
+        <nav class="menu-actions">
+          <button class="btn ghost" data-action="demo"><span class="play-tri"></span>Watch AI Demo</button>
+          <button class="btn ghost" data-action="guide">Shape Guide</button>
+          <button class="btn ghost" data-action="achievements">Achievements <span id="ach-count" class="count"></span></button>
+          <button class="btn ghost" data-action="scores">High Scores</button>
+          <button class="btn ghost" data-action="settings">Settings</button>
+        </nav>
+      </div>
+      <footer class="menu-footer">
+        <label class="player-chip">Playing as <input id="player-name" maxlength="16" spellcheck="false" autocomplete="off"></label>
+        <span id="lifetime" class="lifetime"></span>
+        <span class="engine-badge"><i class="dot"></i><span id="engine-label">Java engine</span></span>
+      </footer>
+      <p class="hint">Hold the mouse and drag to slice the shapes floating behind this menu</p>
+    </section>
+
+    <section id="screen-pause" class="screen">
+      <div class="panel narrow center">
+        <h2 class="big">PAUSED</h2>
+        <div class="buttons column">
+          <button class="btn primary" data-action="resume">Resume</button>
+          <button class="btn ghost" data-action="restart">Restart</button>
+          <button class="btn ghost" data-action="end">End run &amp; see results</button>
+          <button class="btn ghost" data-action="menu">Main menu</button>
+        </div>
+        <p class="muted keys">Esc / Space to resume · F fullscreen · M mute</p>
+      </div>
+    </section>
+
+    <section id="screen-over" class="screen">
+      <div class="panel results">
+        <div id="over-reason" class="over-reason">GAME OVER</div>
+        <div id="over-mode" class="muted"></div>
+        <div id="over-score" class="over-score">0</div>
+        <div id="over-rank" class="rank"></div>
+        <div id="over-stats" class="stats"></div>
+        <div id="over-shapes" class="chips"></div>
+        <div id="over-unlocked" class="unlocked-list"></div>
+        <div class="buttons">
+          <button id="btn-again" class="btn primary" data-action="again">Play again</button>
+          <button class="btn ghost" data-action="menu">Main menu</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-guide" class="screen">
+      <div class="panel wide">
+        <div class="panel-head"><h2>Shape Guide</h2><button class="btn ghost small" data-action="back">Back</button></div>
+        <div id="guide-body" class="scroll"></div>
+      </div>
+    </section>
+
+    <section id="screen-achievements" class="screen">
+      <div class="panel wide">
+        <div class="panel-head"><h2>Achievements</h2><span id="ach-summary" class="muted"></span><button class="btn ghost small" data-action="back">Back</button></div>
+        <div class="progress"><div id="ach-progress"></div></div>
+        <div id="achievements-body" class="badges scroll"></div>
+      </div>
+    </section>
+
+    <section id="screen-scores" class="screen">
+      <div class="panel wide">
+        <div class="panel-head"><h2>High Scores</h2><div id="score-tabs" class="tabs"></div><button class="btn ghost small" data-action="back">Back</button></div>
+        <div id="scores-body" class="scroll"></div>
+      </div>
+    </section>
+
+    <section id="screen-settings" class="screen">
+      <div class="panel">
+        <div class="panel-head"><h2>Settings</h2><button class="btn ghost small" data-action="back">Back</button></div>
+        <div id="settings-body" class="settings scroll"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toasts"></div>
+  <div id="fps"></div>
+</body>
+</html>

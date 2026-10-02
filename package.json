@@ -1,0 +1,113 @@
+{
+  "name": "polyslice",
+  "productName": "PolySlice",
+  "version": "1.0.0",
+  "description": "A neon, Fruit Ninja-style shape slicing game: a Java game engine driving an Electron + Three.js front end.",
+  "main": "electron/main.js",
+  "author": "PolySlice Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build:engine": "node scripts/build-engine.mjs",
+    "test:engine": "node scripts/build-engine.mjs --test",
+    "test:e2e": "node scripts/build-engine.mjs && node scripts/vendor.mjs && electron . --selftest",
+    "test": "npm run test:engine && npm run test:e2e",
+    "build:jre": "node scripts/build-jre.mjs",
+    "start": "node scripts/build-engine.mjs && node scripts/vendor.mjs && electron .",
+    "dev": "node scripts/build-engine.mjs && node scripts/vendor.mjs && electron . --dev",
+    "screenshots": "node scripts/build-engine.mjs && node scripts/vendor.mjs && electron . --capture=docs/screenshots",
+    "icon": "electron scripts/make-icon.cjs",
+    "dist": "node scripts/build-engine.mjs && node scripts/vendor.mjs && node scripts/build-jre.mjs && electron-builder --mac",
+    "dist:dir": "node scripts/build-engine.mjs && node scripts/vendor.mjs && node scripts/build-jre.mjs && electron-builder --mac --dir",
+    "vendor": "node scripts/vendor.mjs",
+    "postinstall": "node scripts/vendor.mjs",
+    "dist:win": "node scripts/build-engine.mjs && node scripts/vendor.mjs && node scripts/fetch-jre-win.mjs && electron-builder --win --x64",
+    "dist:all": "npm run dist && npm run dist:win",
+    "fetch:jre-win": "node scripts/fetch-jre-win.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/exo-2": "^5.3.0",
+    "@fontsource/orbitron": "^5.3.0",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "three": "^0.186.1"
+  },
+  "build": {
+    "appId": "com.polyslice.game",
+    "productName": "PolySlice",
+    "copyright": "PolySlice",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "electron/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.arcade-games",
+      "icon": "assets/icon.png",
+      "target": [
+        "dmg"
+      ],
+      "identity": null,
+      "extraResources": [
+        {
+          "from": "engine/build/polyslice-engine.jar",
+          "to": "engine/polyslice-engine.jar"
+        },
+        {
+          "from": "build/jre",
+          "to": "jre"
+        }
+      ]
+    },
+    "dmg": {
+      "title": "PolySlice"
+    },
+    "electronLanguages": [
+      "en",
+      "en-US"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "extraResources": [
+        {
+          "from": "engine/build/polyslice-engine.jar",
+          "to": "engine/polyslice-engine.jar"
+        },
+        {
+          "from": "build/jre-win",
+          "to": "jre"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "PolySlice",
+      "artifactName": "PolySlice-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "PolySlice-${version}-portable.exe"
+    }
+  }
+}

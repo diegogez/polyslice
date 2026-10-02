@@ -1,0 +1,17 @@
+# Dependencies (restored by `npm install`)
+node_modules/
+
+# Generated: copied from node_modules by scripts/vendor.mjs on install
+renderer/vendor/
+
+# Build output
+engine/build/
+build/
+dist/
+
+# OS / editor noise
+.DS_Store
+*.log
+.idea/
+.vscode/
+*.iml
