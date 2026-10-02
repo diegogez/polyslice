@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "A neon, Fruit Ninja-style shape slicing game: a Java game engine driving an Electron + Three.js front end.",
   "main": "electron/main.js",
-  "author": "PolySlice Team",
+  "author": "Diego Gutierrez",
   "license": "MIT",
   "private": true,
   "scripts": {
