@@ -128,7 +128,7 @@ You can drive the engine by hand: `java -jar engine/build/polyslice-engine.jar`,
 
 ## Getting started
 
-**To play:** download the macOS `.dmg` or a Windows `.exe` from this repo's **Releases** page, or build them yourself (below). Neither needs Java installed.
+**To play:** download the macOS `.dmg` or a Windows `.exe` from this repo's **Releases**(https://github.com/diegogez/polyslice/releases/) page, or build them yourself (below). Neither needs Java installed.
 
 **To build or run from source:** macOS or Windows, [Node.js](https://nodejs.org) 22.12+, and a JDK 17+ (for example `brew install openjdk` on a Mac).
 
